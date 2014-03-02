@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import re
 
 def two_steps_capture(myres1, myres2, content):
     for r1 in myres1:
@@ -20,7 +23,7 @@ def one_step_capture(myres, content):
 
 def wrap_html_special_words(s):
     if isinstance(s, str):
-        return s.replace("&nbsp", "").strip()
+        return re.sub("&nbsp;", "", s.strip())
     if isinstance(s, (list, tuple)):
         new = []
         for i in s:

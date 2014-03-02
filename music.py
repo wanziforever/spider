@@ -48,4 +48,24 @@ class Music(Media):
         s += "length: %s\n"%(self.length)
         s += "summary: %s\n"%(self.summary)
         return s
+
+if __name__ == "__main__":
+    import urllib2
+    myid = 1761091
+    url = "http://music.douban.com/subject/{0}/".format(myid)
+    hdr = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+       #'Accept-Encoding':'gzip,deflate,sdch',
+       'Accept-Language':'zh-CN,zh;q=0.8',
+       'Cache-Control':'max-age=0',
+       'Connection':'keep-alive',
+       'User-Agent':'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.117 Safari/537.36'}
+    req = urllib2.Request(url, headers=hdr)
+    page = urllib2.urlopen(req)
+    content = page.read()
+    from spider import genMedia
+    media = genMedia(myid, url, content)
+    media.setParameters(content)
+    print "[ %s ]"%url
+    print repr(media)
+    
     

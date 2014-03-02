@@ -177,6 +177,7 @@ def genMedia(id, url, source):
     
     if title == '':
         print "no title found for id", id
+        return None
     media.setTitle(title)
 
     return media
@@ -270,16 +271,20 @@ if __name__ == "__main__":
         if not validate_response(content, status):
             continue
         media = genMedia(myid, real_url, content)
-        media.setParameters(content)
-        if media is None:
-            print "media is None for ", myid
-        else:
-            print repr(media)
         if real_url != url:
             #print "real url is %s, but access to is %s"%(real_url, url)
             urlmgt.append_media(real_url, status, None)
 
         urlmgt.append_media(real_url, status, media)
+        if media is None:
+            print "media is None for ", myid
+            continue
+            
+        media.setParameters(content)
+
+        print repr(media)
+        
+        
         #content = req.read()
         count += 1
         if (count % 20) == 0:

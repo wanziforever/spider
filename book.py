@@ -13,8 +13,8 @@ class Book(Media):
     publisher_re_try_list = [re.compile(r'''<span class="pl">出版社:</span>(.+)<br/>''')]
     pubdate_re_try_list = [re.compile(r'''<span class="pl">出版年:</span>(.+)<br/>''')]
     length_re_try_list = [re.compile(r'''<span class="pl">页数:</span>(.+)<br/>''')]
-    #summary_re_try_list = [re.compile(r'''<div class="intro">[\n\r\s]*(.*?)</p></div>''', re.MULTILINE)]
-    summary_re_try_list = [re.compile(r'''<div class="intro">[\n\r\s]*(.*?)(?:<a(?:.*?)</a>)*</p></div>''', re.MULTILINE)]
+    #summary_re_try_list = [re.compile(r'''<div class="intro">[\n\r\s]*(.*?)<p>(?:<a(?:.*?)</a>)*</p></div>''', re.MULTILINE)]
+    summary_re_try_list = [re.compile(r'''<div class="intro">[\n\r\s]*(.*?)(?:<p><a(?:.*?)</a></p>)*</div>''', re.MULTILINE)]
 
     def __init__(self, id):
         super(Book, self).__init__(id, 'book')
@@ -52,7 +52,7 @@ class Book(Media):
         
 if __name__ == "__main__":
     import urllib2
-    myid = 1981618
+    myid = 1957586
     url = "http://book.douban.com/subject/{0}/".format(myid)
     hdr = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
        #'Accept-Encoding':'gzip,deflate,sdch',
