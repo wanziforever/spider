@@ -195,14 +195,14 @@ def flushData():
     gc.collect()
     titles = []
 
-def dumpUrlmgt():
+def dumpUrlmgt(dumpf):
     global urlmgt
-    with open(dump_file, "wb") as f:
+    with open(dumpf, "wb") as f:
         pickle.dump(urlmgt, f, pickle.HIGHEST_PROTOCOL)
 
-def loadUrlmgt():
+def loadUrlmgt(dumpf):
     try:
-        with open(dump_file, "rb") as f:
+        with open(dumpf, "rb") as f:
             urlmgt = pickle.load(f)
     except Exception, e :
         return None
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     print "spider start from %s to %s ..."%(start, end)
     time.sleep(2)
 
-    urlmgt = loadUrlmgt()
+    urlmgt = loadUrlmgt(dump_file)
     if urlmgt is None:
         urlmgt = UrlManager()
 
@@ -288,16 +288,16 @@ if __name__ == "__main__":
         #content = req.read()
         count += 1
         if (count % 20) == 0:
-            print "\n### %s links processed ###\n"%count
-            dumpUrlmgt()
-        sleep_timer = random.uniform(0.3, 3.2)
+            print "\n----------- %s links processed -----------\n"%count
+            dumpUrlmgt(dump_file)
+        sleep_timer = random.uniform(0.3, 2.2)
         #print "sleep_timer", sleep_timer
         time.sleep(sleep_timer)
 
         #print content
     print repr(urlmgt)
     
-    dumpUrlmgt()
+    dumpUrlmgt(dump_file)
 
     urlmgt.show_medias()
     

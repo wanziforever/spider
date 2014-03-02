@@ -20,7 +20,8 @@ class Movie(Media):
     language_re_try_list = [re.compile(r'''<span class="pl">语言:</span>(.+)<br/>''')]
     pubdate_re_try_list = [re.compile(r'''<span class="pl">上映日期:</span> <span property="(?:.+?)" content="(?:.+)">(.+)</span><br/>''')]
     length_re_try_list = [re.compile(r'''<span class="pl">片长:</span> <span property="v:runtime" content="(?:.*?)">(.+)</span><br/>''')]
-    summary_re_try_list = [re.compile(r'''<span property="v:summary" class="">\s*[\n\r]*\s*(.+)[\n\r]*\s*</span>''', re.MULTILINE)]
+    #summary_re_try_list = [re.compile(r'''<span property="v:summary" class="">\s*[\n\r]*\s*(.+)[\n\r]*\s*</span>''', re.MULTILINE)]
+    summary_re_try_list = [re.compile(r'''<span property="v:summary" class="">(([\n\r\s]*.*[\n\r\s]*)+?)</span>''', re.MULTILINE)]
     def __init__(self, id):
         super(Movie, self).__init__(id, 'movie')
         self.stars = []
@@ -76,7 +77,7 @@ class Movie(Media):
     
 if __name__ == "__main__":
     import urllib2
-    myid = 1295768
+    myid = 1307011
     url = "http://movie.douban.com/subject/{0}/".format(myid)
     hdr = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
        #'Accept-Encoding':'gzip,deflate,sdch',
