@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import urllib2
+#import urllib2
+import httplib2
 import re
 import os
 import sys
@@ -16,6 +17,9 @@ from movie import Movie
 from book import Book
 from music import Music
 
+from cookies import avaliable_cookies
+from agents import avaliable_agents
+
 book_re = re.compile(r"http://book.douban.com.*")
 movie_re = re.compile(r"http://movie.douban.com.*")
 music_re = re.compile(r"http://music.douban.com.*")
@@ -29,19 +33,26 @@ douban_tv = "http://movie.douban.com/subject/{0}/"
 start = 1000001
 end = 2000000
 
-#hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-#       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-#       'Accept-Encoding': 'none',
-#       'Accept-Language': 'en-US,en;q=0.8',
-#       'Connection': 'keep-alive'}
-#hdr = {'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'}
+# secends
+max_sleep = 2
+min_sleep = 0.5
+
 hdr = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
        #'Accept-Encoding':'gzip,deflate,sdch',
        'Accept-Language':'zh-CN,zh;q=0.8',
        'Cache-Control':'max-age=0',
        'Connection':'keep-alive',
-       'User-Agent':'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.117 Safari/537.36'}
+       'User-Agent':"",
+       'Cookie': ""}
+
+hdrs = []
+
+for c in avaliable_cookies:
+    for a in avaliable_agents:
+        new_hdr = dict(hdr)
+        #new_hdr['cookie'] = c
+        new_hdr['User_Agent'] = a
+        hdrs.append(new_hdr)
 
 
 class UrlManager(object):
@@ -67,7 +78,7 @@ class UrlManager(object):
         elif status < 500 and status > 400:
             return self.failed_url_pool
         else:
-            return self.other_url_poll
+            return self.other_url_po0l
 
     def get_pool_by_url(self, url):
         if self.ok_url_pool.has_key(url):
@@ -231,6 +242,9 @@ if __name__ == "__main__":
     end = int(sys.argv[2])
 
     print "spider start from %s to %s ..."%(start, end)
+    with open("./log", "w") as f:
+        f.write("spider start from %s to %s\n"%(start, end))
+    
     time.sleep(2)
 
     urlmgt = loadUrlmgt(dump_file)
@@ -244,7 +258,8 @@ if __name__ == "__main__":
     id_collection = [random.randrange(start, end+1) for n in xrange(start, end)]
     #print id_collection
     count = 0
-    
+    cookie_loop = 0
+    req = httplib2.Http()
     for myid in id_collection:
         url = douban_tv.format(myid)
         #print "\n[ %s ]"%url,
@@ -252,20 +267,16 @@ if __name__ == "__main__":
             print "[already accessed]"
             continue
         print ''
-        req = urllib2.Request(url, headers=hdr)
-        status = 200
-        real_url = None
+        real_url = ""
         content = ''
-        try:
-            page = urllib2.urlopen(req)
-            content = page.read()
-            status = page.getcode()
-            real_url = page.geturl()
-            page.close()
-        except urllib2.HTTPError, e:
-            #print e.reason
-            status = e.code
-            real_url = url
+        #page = urllib2.urlopen(req)
+        num_of_hdr = len(hdrs)
+        new_hdr = hdrs[cookie_loop%num_of_hdr]
+        cookie_loop +=1
+        resp,content = req.request(url, headers=hdr)
+        status = int(resp["status"])
+        real_url = resp.get("content-location", url)
+        #req.close()
 
         print "[ %s ]"%real_url
         if not validate_response(content, status):
@@ -284,13 +295,12 @@ if __name__ == "__main__":
 
         print repr(media)
         
-        
         #content = req.read()
         count += 1
         if (count % 20) == 0:
             print "\n----------- %s links processed -----------\n"%count
             dumpUrlmgt(dump_file)
-        sleep_timer = random.uniform(0.3, 2.2)
+        sleep_timer = random.uniform(min_sleep, max_sleep)
         #print "sleep_timer", sleep_timer
         time.sleep(sleep_timer)
 
